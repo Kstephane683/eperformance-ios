@@ -50,7 +50,8 @@ final class APIClient {
 
     @discardableResult
     private func post(path: String, body: [String: Any]) async throws -> Data {
-        var request = URLRequest(url: baseURL.appendingPathComponent(path))
+        guard let url = URL(string: path, relativeTo: baseURL) else { throw APIError(message: "URL invalide.") }
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
