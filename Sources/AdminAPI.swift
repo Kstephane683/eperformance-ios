@@ -44,6 +44,9 @@ final class AdminAPI {
         guard let role = object?["role"] as? String, role == "admin" else { throw APIError(message: "Ce compte n’est pas administrateur.") }
         return role
     }
+    func performAction(_ body: [String: Any]) async throws {
+        _ = try await post("/api/admin/actions", body: body)
+    }
     func overview() async throws -> AdminOverview {
         var request = URLRequest(url: URL(string: "/api/admin/overview", relativeTo: baseURL)!)
         request.httpMethod = "GET"

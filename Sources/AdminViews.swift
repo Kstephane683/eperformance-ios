@@ -146,8 +146,8 @@ struct AdminInboxView: View {
     var body: some View {
         NavigationStack { List {
             if let o = overview {
-                Section("Contacts") { ForEach(o.leads) { lead in VStack(alignment: .leading, spacing: 5) { HStack { Text(lead.name).font(.system(size: 14, weight: .semibold)); Spacer(); Text(lead.status).font(.system(size: 9)).foregroundStyle(Brand.gold) }; Text("\(lead.company ?? "") · \(lead.email)").font(.system(size: 11)).foregroundStyle(Brand.muted); if let m = lead.message { Text(m).font(.system(size: 12)).lineLimit(2) } } } }
-                Section("Diagnostics") { ForEach(o.diagnostics) { d in HStack { VStack(alignment: .leading) { Text(d.name).font(.system(size: 13, weight: .semibold)); Text("\(d.businessType.uppercased()) · \(d.priority ?? "—")").font(.system(size: 10)).foregroundStyle(Brand.muted) }; Spacer(); Text(d.status).font(.system(size: 9)).foregroundStyle(Brand.gold) } } }
+                Section("Contacts") { ForEach(o.leads) { lead in NavigationLink { LeadDetailView(lead: lead) } label: { VStack(alignment: .leading, spacing: 5) { HStack { Text(lead.name).font(.system(size: 14, weight: .semibold)); Spacer(); Text(lead.status).font(.system(size: 9)).foregroundStyle(Brand.gold) }; Text("\(lead.company ?? "") · \(lead.email)").font(.system(size: 11)).foregroundStyle(Brand.muted); if let m = lead.message { Text(m).font(.system(size: 12)).lineLimit(2) } } } }
+                Section("Diagnostics") { ForEach(o.diagnostics) { d in NavigationLink { DiagnosticDetailView(diagnostic: d) } label: { HStack { VStack(alignment: .leading) { Text(d.name).font(.system(size: 13, weight: .semibold)); Text("\(d.businessType.uppercased()) · \(d.priority ?? "—")").font(.system(size: 10)).foregroundStyle(Brand.muted) }; Spacer(); Text(d.status).font(.system(size: 9)).foregroundStyle(Brand.gold) } }
             } else { Text(error).foregroundStyle(Brand.danger) }
         }.navigationTitle("Entrants").task { do { overview = try await AdminAPI.shared.overview() } catch let e { error = e.localizedDescription } } }
     }
@@ -159,7 +159,7 @@ struct AdminAgendaView: View {
     var body: some View {
         NavigationStack { List {
             if let o = overview {
-                ForEach(o.appointments) { a in VStack(alignment: .leading, spacing: 5) { HStack { Text(a.name).font(.system(size: 14, weight: .semibold)); Spacer(); Text(a.status).font(.system(size: 9)).foregroundStyle(Brand.gold) }; Text("\(a.email) · \(a.whatsapp ?? "")").font(.system(size: 11)).foregroundStyle(Brand.muted); Text(a.preferredAt ?? "Créneau à confirmer").font(.system(size: 11)); if let m = a.message { Text(m).font(.system(size: 12)).lineLimit(2) } } }
+                ForEach(o.appointments) { a in NavigationLink { AppointmentDetailView(appointment: a) } label: { VStack(alignment: .leading, spacing: 5) { HStack { Text(a.name).font(.system(size: 14, weight: .semibold)); Spacer(); Text(a.status).font(.system(size: 9)).foregroundStyle(Brand.gold) }; Text("\(a.email) · \(a.whatsapp ?? "")").font(.system(size: 11)).foregroundStyle(Brand.muted); Text(a.preferredAt ?? "Créneau à confirmer").font(.system(size: 11)); if let m = a.message { Text(m).font(.system(size: 12)).lineLimit(2) } } }
             } else { Text(error).foregroundStyle(Brand.danger) }
         }.navigationTitle("Agenda").task { do { overview = try await AdminAPI.shared.overview() } catch let e { error = e.localizedDescription } } }
     }
