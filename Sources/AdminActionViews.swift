@@ -8,6 +8,12 @@ struct LeadDetailView: View {
     @State private var busy = false
     @State private var error = ""
     @State private var converted = false
+    @State private var channel = "whatsapp"
+    @State private var messageBody = ""
+    @State private var assistantSummary = ""
+    @State private var assistantBusy = false
+    @State private var messageStatus = ""
+    @State private var confirmSend = false
     var body: some View {
         Form {
             Section("Contact") {
@@ -31,10 +37,27 @@ struct LeadDetailView: View {
                 if converted { Label("Diagnostic créé", systemImage: "checkmark.circle.fill").foregroundStyle(Brand.gold) }
                 else { Button("Créer le diagnostic prérempli") { Task { await convert() } }.disabled(busy) }
             }
+            Section("Assistant IA") {
+                Button(assistantBusy ? "Analyse…" : "Préparer une réponse") { Task { await prepareAssistant() } }.disabled(assistantBusy)
+                if !assistantSummary.isEmpty { Text(assistantSummary).font(.system(size: 12)).foregroundStyle(Brand.muted) }
+            }
+            Section("Message manuel") {
+                Picker("Canal", selection: $channel) { Text("WhatsApp").tag("whatsapp"); Text("Email").tag("email") }.pickerStyle(.segmented)
+                TextField("Message à valider…", text: $messageBody, axis: .vertical).lineLimit(4...8)
+                HStack {
+                    Button("Enregistrer le brouillon") { Task { await sendMessage(false) } }.buttonStyle(.bordered)
+                    Button("Envoyer") { confirmSend = true }.buttonStyle(.borderedProminent)
+                }.disabled(messageBody.isEmpty)
+                if !messageStatus.isEmpty { Text(messageStatus).font(.system(size: 11)).foregroundStyle(messageStatus.hasPrefix("Message envoyé") ? Brand.gold : Brand.danger) }
+            }
             if !error.isEmpty { Section { Text(error).foregroundStyle(Brand.danger) } }
         }
         .navigationTitle(lead.name)
-        .onAppear { status = lead.status }
+        .onAppear { status = lead.status; channel = lead.whatsapp == nil ? "email" : "whatsapp" }
+        .alert("Envoyer ce message ?", isPresented: $confirmSend) {
+            Button("Annuler", role: .cancel) {}
+            Button("Envoyer", role: .destructive) { Task { await sendMessage(true) } }
+        } message: { Text("Le message sera envoyé au contact. Cette action peut être facturée par WhatsApp.") }
     }
     func saveStatus() async {
         busy = true; error = ""
@@ -47,6 +70,24 @@ struct LeadDetailView: View {
         do { try await AdminAPI.shared.performAction(["action":"convert_lead","id":lead.id]); converted = true }
         catch let e { error = e.localizedDescription }
         busy = false
+    }
+    func prepareAssistant() async {
+        assistantBusy = true; error = ""
+        do {
+            let result = try await AdminAPI.shared.assistant(leadId: lead.id)
+            assistantSummary = result.0
+            if !result.1.isEmpty { messageBody = result.1 }
+        } catch let e { error = e.localizedDescription }
+        assistantBusy = false
+    }
+    func sendMessage(_ send: Bool) async {
+        messageStatus = ""
+        do {
+            let result = try await AdminAPI.shared.message(leadId: lead.id, channel: channel, body: messageBody, send: send)
+            messageStatus = send ? "Message envoyé." : "Brouillon enregistré."
+            if !send { messageBody = "" }
+            _ = result
+        } catch let e { messageStatus = e.localizedDescription }
     }
 }
 

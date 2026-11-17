@@ -14,7 +14,7 @@ struct AdminOverview: Decodable {
 struct AdminInfo: Decodable { let name: String; let email: String }
 struct Stats: Decodable { let leads: Int; let diagnostics: Int; let appointments: Int; let payments: Int; let reports: Int }
 struct Lead: Decodable, Identifiable {
-    let id: String; let name: String; let company: String?; let email: String; let source: String; let segment: String; let message: String?; let status: String; let createdAt: String?
+    let id: String; let name: String; let company: String?; let email: String; let whatsapp: String?; let source: String; let segment: String; let message: String?; let status: String; let createdAt: String?
 }
 struct Diagnostic: Decodable, Identifiable {
     let id: String; let name: String; let email: String; let businessType: String; let priority: String?; let status: String; let createdAt: String?
@@ -45,6 +45,16 @@ final class AdminAPI {
         let object = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         guard let role = object?["role"] as? String, role == "admin" else { throw APIError(message: "Ce compte n’est pas administrateur.") }
         return role
+    }
+    func assistant(leadId: String) async throws -> (String, String) {
+        let data = try await post("/api/admin/lead-assistant", body: ["leadId": leadId])
+        let object = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        return (object?["summary"] as? String ?? "", object?["draft"] as? String ?? "")
+    }
+    func message(leadId: String, channel: String, body: String, send: Bool) async throws -> String {
+        let data = try await post("/api/admin/messages", body: ["leadId": leadId, "channel": channel, "body": body, "action": send ? "send" : "draft"])
+        let object = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        return object?["status"] as? String ?? "draft"
     }
     func performAction(_ body: [String: Any]) async throws {
         _ = try await post("/api/admin/actions", body: body)
