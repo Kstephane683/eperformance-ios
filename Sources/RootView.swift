@@ -34,7 +34,7 @@ struct LoginView: View {
                                 Task {
                                     busy = true; error = ""
                                     do { try await APIClient.shared.requestCode(email: email, name: name, activityType: "pme"); codeSent = true }
-                                    catch { error = error.localizedDescription }
+                                    catch let err { error = err.localizedDescription }
                                     busy = false
                                 }
                             }
@@ -46,7 +46,7 @@ struct LoginView: View {
                                 Task {
                                     busy = true; error = ""
                                     do { let role = try await APIClient.shared.verifyCode(email: email, code: code); session.signIn(email: email, name: name, role: role) }
-                                    catch { error = error.localizedDescription }
+                                    catch let err { error = err.localizedDescription }
                                     busy = false
                                 }
                             }
@@ -128,7 +128,7 @@ struct DiagnosticView: View {
                                     do {
                                         try await APIClient.shared.submitDiagnostic(["name": session.name, "email": session.email, "businessType": "pme", "priority": priority, "stage": "croissance", "blocker": blocker, "measurementLevel": "partial", "goal": goal, "adsActive": false, "website": true, "channels": []])
                                         message = "Diagnostic enregistré. Votre rapport sera publié dans votre espace."
-                                    } catch { message = error.localizedDescription }
+                                    } catch let err { message = err.localizedDescription }
                                     busy = false
                                 }
                             }
@@ -172,7 +172,7 @@ struct ContactView: View {
                                         try await APIClient.shared.submitContact(["name": session.name, "company": company, "country": country, "email": session.email, "whatsapp": "", "source": "ios", "segment": "pme", "priority": priority, "message": message, "consent": true])
                                         status = "Message reçu. Je reviens vers vous sous 24 h."
                                         message = ""
-                                    } catch { status = error.localizedDescription }
+                                    } catch let err { status = err.localizedDescription }
                                     busy = false
                                 }
                             }
@@ -209,7 +209,7 @@ struct BookingView: View {
                                     do {
                                         try await APIClient.shared.requestAppointment(["name": session.name, "email": session.email, "whatsapp": "", "preferredAt": iso.string(from: date), "message": note])
                                         status = "Demande enregistrée. Je confirme le créneau."
-                                    } catch { status = error.localizedDescription }
+                                    } catch let err { status = err.localizedDescription }
                                     busy = false
                                 }
                             }
