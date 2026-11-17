@@ -7,7 +7,6 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    DEVELOPMENT_TEAM: ""
 targets:
   EPerformance:
     type: application
@@ -23,15 +22,3 @@ targets:
         CODE_SIGNING_ALLOWED: "NO"
         CODE_SIGNING_REQUIRED: "NO"
         ENABLE_BITCODE: "NO"
-    info:
-      path: Sources/Info.plist
-      properties:
-        CFBundleDisplayName: ePerformance
-        CFBundleShortVersionString: "1.0"
-        CFBundleVersion: "1"
-        UILaunchScreen:
-          UIColorName: ""
-        UISupportedInterfaceOrientations:
-          - UIInterfaceOrientationPortrait
-        NSAppTransportSecurity:
-          NSAllowsArbitraryLoads: false
