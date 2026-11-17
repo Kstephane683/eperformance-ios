@@ -12,4 +12,11 @@
 <key>UILaunchScreen</key><dict/>
 <key>UISupportedInterfaceOrientations</key><array><string>UIInterfaceOrientationPortrait</string></array>
 <key>NSAppTransportSecurity</key><dict><key>NSAllowsArbitraryLoads</key><false/></dict>
+<key>UIApplicationShortcutItems</key>
+<array>
+  <dict><key>UIApplicationShortcutItemType</key><string>leads</string><key>UIApplicationShortcutItemTitle</key><string>Nouveaux contacts</string><key>UIApplicationShortcutItemIconType</key><string>UIApplicationShortcutIconTypeContact</string></dict>
+  <dict><key>UIApplicationShortcutItemType</key><string>diagnostics</string><key>UIApplicationShortcutItemTitle</key><string>Diagnostics</string><key>UIApplicationShortcutItemIconType</key><string>UIApplicationShortcutIconTypeDate</string></dict>
+  <dict><key>UIApplicationShortcutItemType</key><string>agenda</string><key>UIApplicationShortcutItemTitle</key><string>Agenda</string><key>UIApplicationShortcutItemIconType</key><string>UIApplicationShortcutIconTypeDate</string></dict>
+  <dict><key>UIApplicationShortcutItemType</key><string>site</string><key>UIApplicationShortcutItemTitle</key><string>Site ePerformance</string><key>UIApplicationShortcutItemIconType</key><string>UIApplicationShortcutIconTypeSearch</string></dict>
+</array>
 </dict></plist>

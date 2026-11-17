@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct AdminRootView: View {
     @EnvironmentObject var session: AdminSession
@@ -66,6 +67,16 @@ struct AdminTabs: View {
             AdminInboxView().tabItem { Label("Entrants", systemImage: "tray.full") }.tag(1)
             AdminAgendaView().tabItem { Label("Agenda", systemImage: "calendar") }.tag(2)
             AdminMoreView().tabItem { Label("Plus", systemImage: "ellipsis.circle") }.tag(3)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .epQuickAction)) { note in
+            if let type = note.object as? String {
+                switch type {
+                case "leads", "diagnostics": tab = 1
+                case "agenda": tab = 2
+                case "site": UIApplication.shared.open(URL(string: "https://eperformance.pro")!)
+                default: tab = 0
+                }
+            }
         }
     }
 }

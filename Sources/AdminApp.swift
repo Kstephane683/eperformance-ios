@@ -3,6 +3,7 @@ import UserNotifications
 
 @main
 struct EPerformanceAdminApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var session = AdminSession()
     @StateObject private var notifications = NotificationManager()
     var body: some Scene {
