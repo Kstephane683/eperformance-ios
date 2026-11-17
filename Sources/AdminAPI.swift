@@ -23,6 +23,8 @@ struct Appointment: Decodable, Identifiable {
     let id: String; let name: String; let email: String; let whatsapp: String?; let preferredAt: String?; let message: String?; let status: String; let createdAt: String?
 }
 struct Payment: Decodable, Identifiable { let id: String; let amountXof: Int; let status: String; let email: String?; let createdAt: String? }
+struct InfraResource: Decodable, Identifiable { let id: String; let name: String; let type: String; let status: String; let url: String? }
+struct InfraResponse: Decodable { let ok: Bool; let resources: [InfraResource] }
 
 final class AdminAPI {
     static let shared = AdminAPI()
@@ -46,6 +48,17 @@ final class AdminAPI {
     }
     func performAction(_ body: [String: Any]) async throws {
         _ = try await post("/api/admin/actions", body: body)
+    }
+    func infra() async throws -> [InfraResource] {
+        var request = URLRequest(url: URL(string: "/api/admin/infra", relativeTo: baseURL)!)
+        request.httpMethod = "GET"
+        let (data, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { throw APIError(message: "Coolify indisponible.") }
+        let decoder = JSONDecoder()
+        return try decoder.decode(InfraResponse.self, from: data).resources
+    }
+    func infraAction(uuid: String, type: String, action: String) async throws {
+        _ = try await post("/api/admin/infra", body: ["uuid": uuid, "type": type, "action": action])
     }
     func overview() async throws -> AdminOverview {
         var request = URLRequest(url: URL(string: "/api/admin/overview", relativeTo: baseURL)!)

@@ -66,7 +66,8 @@ struct AdminTabs: View {
             AdminOverviewView().tabItem { Label("Vue", systemImage: "square.grid.2x2") }.tag(0)
             AdminInboxView().tabItem { Label("Entrants", systemImage: "tray.full") }.tag(1)
             AdminAgendaView().tabItem { Label("Agenda", systemImage: "calendar") }.tag(2)
-            AdminMoreView().tabItem { Label("Plus", systemImage: "ellipsis.circle") }.tag(3)
+            AdminInfraView().tabItem { Label("Infra", systemImage: "server.rack") }.tag(3)
+            AdminMoreView().tabItem { Label("Plus", systemImage: "ellipsis.circle") }.tag(4)
         }
         .onReceive(NotificationCenter.default.publisher(for: .epQuickAction)) { note in
             if let type = note.object as? String {
