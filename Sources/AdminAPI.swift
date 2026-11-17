@@ -23,6 +23,8 @@ struct Appointment: Decodable, Identifiable {
     let id: String; let name: String; let email: String; let whatsapp: String?; let preferredAt: String?; let message: String?; let status: String; let createdAt: String?
 }
 struct Payment: Decodable, Identifiable { let id: String; let amountXof: Int; let status: String; let email: String?; let createdAt: String? }
+struct Program: Decodable, Identifiable { let id: String; let email: String; let name: String; let type: String; let priceXof: Int; let accessStatus: String }
+struct ProgramsResponse: Decodable { let ok: Bool; let programs: [Program] }
 struct InfraResource: Decodable, Identifiable { let id: String; let name: String; let type: String; let status: String; let url: String? }
 struct InfraResponse: Decodable { let ok: Bool; let resources: [InfraResource] }
 
@@ -58,6 +60,16 @@ final class AdminAPI {
     }
     func performAction(_ body: [String: Any]) async throws {
         _ = try await post("/api/admin/actions", body: body)
+    }
+    func programs() async throws -> [Program] {
+        var request = URLRequest(url: URL(string: "/api/admin/programs", relativeTo: baseURL)!)
+        request.httpMethod = "GET"
+        let (data, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { throw APIError(message: "Programmes indisponibles.") }
+        return try JSONDecoder().decode(ProgramsResponse.self, from: data).programs
+    }
+    func programAction(_ body: [String: Any]) async throws {
+        _ = try await post("/api/admin/programs", body: body)
     }
     func infra() async throws -> [InfraResource] {
         var request = URLRequest(url: URL(string: "/api/admin/infra", relativeTo: baseURL)!)

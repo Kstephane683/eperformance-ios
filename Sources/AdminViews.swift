@@ -251,6 +251,7 @@ struct AdminMoreView: View {
         NavigationStack { List {
             Section("Compte") { LabeledContent("Admin", value: session.email); LabeledContent("Notifications", value: notifications.authorized ? "Activées" : "Désactivées"); LabeledContent("Version", value: "1.0.3") }
             Section("Paiements récents") { if let o = overview { ForEach(o.payments.prefix(8)) { p in HStack { Text(p.email ?? "—").font(.system(size: 12)); Spacer(); Text("\(p.amountXof) FCFA").font(.system(size: 11)); Text(p.status).font(.system(size: 9)).foregroundStyle(p.status == "paid" ? Brand.gold : Brand.muted) } } } else { Text("Chargement…").foregroundStyle(Brand.muted) } }
+            Section("Accompagnement") { NavigationLink("Programmes et plans", destination: AdminProgramsView()) }
             Section("Liens") { Link("Site ePerformance", destination: URL(string: "https://eperformance.pro")!); Link("Espace client web", destination: URL(string: "https://app.eperformance.pro/admin")!); Link("Cal.com", destination: URL(string: "https://cal.eperformance.pro/auth/login")!) }
             Section { Button("Se déconnecter", role: .destructive) { session.signOut() } }
         }.navigationTitle("Plus").task { do { overview = try await AdminAPI.shared.overview() } catch let e { error = e.localizedDescription } } }
