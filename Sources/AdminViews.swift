@@ -69,6 +69,8 @@ struct AdminTabs: View {
             AdminInfraView().tabItem { Label("Infra", systemImage: "server.rack") }.tag(3)
             AdminMoreView().tabItem { Label("Plus", systemImage: "ellipsis.circle") }.tag(4)
         }
+        .toolbarBackground(.ultraThinMaterial, for: .tabBar)
+        .toolbarBackground(.visible, for: .tabBar)
         .onReceive(NotificationCenter.default.publisher(for: .epQuickAction)) { note in
             if let type = note.object as? String {
                 switch type {
@@ -90,11 +92,21 @@ struct AdminOverviewView: View {
     @State private var error = ""
     @State private var lastLeads = UserDefaults.standard.integer(forKey: "last_lead_count")
     @State private var banner = ""
+    @State private var showNotifications = false
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
-                    HStack { BrandMark(); Spacer(); Text("ADMIN").font(.system(size: 9, weight: .bold)).tracking(1.5).foregroundStyle(Brand.gold) }
+                    HStack { BrandMark(); Spacer()
+                        Button { showNotifications = true } label: {
+                            ZStack(alignment: .topTrailing) {
+                                Image(systemName: "bell").font(.system(size: 17, weight: .semibold)).foregroundStyle(Brand.ink)
+                                if let o = overview, o.stats.leads + o.stats.appointments > 0 {
+                                    Text("\(min(o.stats.leads + o.stats.appointments, 9))").font(.system(size: 8, weight: .bold)).foregroundStyle(.white).frame(width: 15, height: 15).background(Brand.danger).clipShape(Circle())
+                                }
+                            }.padding(11).background(.ultraThinMaterial, in: Circle()).overlay(Circle().stroke(.white.opacity(0.5)))
+                        }
+                        Text("ADMIN").font(.system(size: 9, weight: .bold)).tracking(1.5).foregroundStyle(Brand.gold) }
                     SectionTitle(eyebrow: "Administration", title: "Vue d’ensemble.")
                     if !banner.isEmpty { Text(banner).font(.system(size: 12, weight: .semibold)).foregroundStyle(Brand.ink).padding(12).frame(maxWidth: .infinity, alignment: .leading).background(Brand.gold.opacity(0.25)).clipShape(RoundedRectangle(cornerRadius: 12)) }
                     if loading { ProgressView().padding() } else if let o = overview {
@@ -111,6 +123,7 @@ struct AdminOverviewView: View {
                     } else { Text(error.isEmpty ? "Chargement…" : error).foregroundStyle(Brand.danger).font(.system(size: 12)) }
                 }.padding(20)
             }.background(Brand.cream.ignoresSafeArea()).refreshable { await load() }
+            .sheet(isPresented: $showNotifications) { AdminNotificationsSheet(overview: overview) }
             .task { await poll() }
         }
     }
@@ -133,6 +146,23 @@ struct AdminOverviewView: View {
         }
         lastLeads = o.stats.leads
         UserDefaults.standard.set(lastLeads, forKey: "last_lead_count")
+    }
+}
+
+struct AdminNotificationsSheet: View {
+    let overview: AdminOverview?
+    @Environment(\.dismiss) var dismiss
+    var body: some View {
+        NavigationStack {
+            List {
+                Section("Nouveaux contacts") {
+                    if let o = overview, !o.leads.isEmpty { ForEach(o.leads.prefix(6)) { l in VStack(alignment: .leading) { Text(l.name).font(.system(size: 13, weight: .semibold)); Text("\(l.source) · \(l.company ?? l.email)").font(.system(size: 11)).foregroundStyle(Brand.muted) } } } else { Text("Aucun nouveau contact.").foregroundStyle(Brand.muted) }
+                }
+                Section("Rendez-vous") {
+                    if let o = overview, !o.appointments.isEmpty { ForEach(o.appointments.prefix(6)) { a in VStack(alignment: .leading) { Text(a.name).font(.system(size: 13, weight: .semibold)); Text(a.preferredAt ?? "Créneau à confirmer").font(.system(size: 11)).foregroundStyle(Brand.muted) } } } else { Text("Aucune demande.").foregroundStyle(Brand.muted) }
+                }
+            }.navigationTitle("Notifications").toolbar { Button("Fermer") { dismiss() } }
+        }
     }
 }
 
