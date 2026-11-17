@@ -16,7 +16,7 @@ targets:
       - Resources
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: pro.eperformance.app
+        PRODUCT_BUNDLE_IDENTIFIER: pro.eperformance.admin
         INFOPLIST_FILE: Sources/Info.plist
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGNING_ALLOWED: "NO"
